@@ -5,10 +5,11 @@
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
+    "start": "npm run setup_db && npm run seed && npm run build && react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "setup_db": "node ./scripts/setup_db.js",
-    "seed": "node ./scripts/seed.js"
+    "seed": "node ./scripts/seed.js",
+    "deploy": "npm run setup_db && npm run seed && npm run build"
   },
   "dependencies": {
     "@react-router/fs-routes": "^7.1.5",

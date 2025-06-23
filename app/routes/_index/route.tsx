@@ -7,7 +7,7 @@ export async function loader() {
 export default function RootPage() {
   return (
     <div className="min-h-screen px-4 py-8 bg-gray-50 text-gray-800">
-      <div className="flex justify-center items-center max-w-5xl mx-auto mb-12">
+      <div className="flex justify-center items-center max-w-5xl mx-auto mb-30">
         <div className="flex gap-6">
           <Link
             to="/employees"
