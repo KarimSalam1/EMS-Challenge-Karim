@@ -9,6 +9,7 @@ import {
 } from "react-router";
 import { useState, useEffect } from "react";
 import { getDB } from "~/db/getDB";
+import LoadingSpinner from "~/utils/loading";
 
 export const loader: LoaderFunction = async ({ params }) => {
   const db = await getDB();
@@ -79,28 +80,42 @@ export default function TimesheetPage() {
     errors?: { time_validation?: string };
   };
   const [editing, setEditing] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const navigation = useNavigation();
 
   useEffect(() => {
     if (editing && navigation.state === "idle" && !actionData?.errors) {
       setEditing(false);
+      setIsUpdating(false);
+    }
+    if (navigation.state === "submitting") {
+      setIsUpdating(true);
     }
   }, [navigation.state, actionData?.errors]);
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      {isUpdating && <LoadingSpinner />}
+
       <div className="flex justify-center gap-4 mb-8">
         <a
-          href="/timesheets"
-          className="border border-green-700 text-green-700 font-semibold px-3 py-1 rounded hover:bg-green-700 hover:text-white transition cursor-pointer"
+          href="/"
+          className="border border-black text-black font-semibold px-3 py-1 rounded hover:bg-black hover:text-white transition"
         >
-          Timesheets
+          Home
         </a>
         <a
           href="/employees"
-          className="border border-gray-700 text-gray-700 font-semibold px-3 py-1 rounded hover:bg-gray-700 hover:text-white transition cursor-pointer"
+          className="border border-blue-700 text-blue-700 font-semibold px-3 py-1 rounded hover:bg-blue-700 hover:text-white transition cursor-pointer"
         >
           Employees
+        </a>
+        <a
+          href="/timesheets"
+          className="border border-gray-700 text-gray-700 font-semibold px-3 py-1 rounded hover:bg-gray-700 hover:text-white transition cursor-pointer"
+        >
+          Timesheets
         </a>
       </div>
 

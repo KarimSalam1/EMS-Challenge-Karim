@@ -3,10 +3,12 @@ import {
   Form,
   redirect,
   useActionData,
+  useNavigation,
   type ActionFunction,
 } from "react-router";
 import { getDB } from "~/db/getDB";
 import { useState } from "react";
+import LoadingSpinner from "~/utils/loading";
 
 export async function loader() {
   const db = await getDB();
@@ -61,6 +63,10 @@ export default function NewTimesheetPage() {
   const [endTime, setEndTime] = useState("");
   const [validationError, setValidationError] = useState("");
 
+  const navigation = useNavigation();
+
+  const isSubmitting = navigation.state === "submitting";
+
   const validateTimes = (start: string, end: string) => {
     if (!start || !end) {
       setValidationError("");
@@ -99,16 +105,24 @@ export default function NewTimesheetPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      {isSubmitting && <LoadingSpinner />}
+
       <div className="flex gap-4 justify-center mb-10">
         <a
+          href="/"
+          className="border border-black text-black font-semibold px-3 py-1 rounded hover:bg-black hover:text-white transition"
+        >
+          Home
+        </a>
+        <a
           href="/employees"
-          className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+          className="border border-blue-700 text-blue-700 font-semibold px-3 py-1 rounded hover:bg-blue-700 hover:text-white transition cursor-pointer"
         >
           Employees
         </a>
         <a
           href="/timesheets"
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          className="border border-gray-700 text-gray-700 font-semibold px-3 py-1 rounded hover:bg-gray-700 hover:text-white transition cursor-pointer"
         >
           Timesheets
         </a>

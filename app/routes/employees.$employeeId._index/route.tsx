@@ -11,6 +11,8 @@ import { getDB } from "~/db/getDB";
 import { useState, useEffect } from "react";
 import fs from "fs/promises";
 import path from "path";
+import { uploadToImgur, uploadToCatbox } from "~/utils/hybridUpload";
+import { LoadingSpinner } from "~/utils/loading";
 
 export const loader: LoaderFunction = async ({ params }) => {
   const db = await getDB();
@@ -82,34 +84,47 @@ export const action: ActionFunction = async ({ request, params }) => {
 
     let photo_path = existingEmployee.photo_path;
     let document_path = existingEmployee.document_path;
-
-    try {
-      if (photoFile && photoFile.name) {
-        const photoBuffer = Buffer.from(await photoFile.arrayBuffer());
-        const photoName = `${Date.now()}_${photoFile.name}`;
-        const photoDest = path.join("public", "uploads", "photos", photoName);
-        await fs.writeFile(photoDest, photoBuffer);
-        photo_path = `/uploads/photos/${photoName}`;
+    if (process.env.NODE_ENV === "production") {
+      try {
+        photo_path = await uploadToImgur(photoFile);
+      } catch (err) {
+        console.error("Photo upload error:", err);
+        return {
+          errors: {
+            photo_file: "Failed to upload photo to UploadThing.",
+          },
+        };
       }
+    } else {
+      const photoBuffer = Buffer.from(await photoFile.arrayBuffer());
+      const devPhotoDir = path.join("public", "uploads", "photos");
+      await fs.mkdir(devPhotoDir, { recursive: true });
+      const photoName = `${Date.now()}_${photoFile.name}`;
+      const photoDest = path.join(devPhotoDir, photoName);
+      await fs.writeFile(photoDest, photoBuffer);
+      photo_path = `/uploads/photos/${photoName}`;
+    }
 
-      if (docFile && docFile.name) {
+    if (docFile && docFile.name) {
+      if (process.env.NODE_ENV === "production") {
+        try {
+          document_path = await uploadToCatbox(docFile);
+        } catch (error) {
+          console.error("Document upload error:", error);
+          return {
+            errors: { doc_file: "Failed to upload document to UploadThing." },
+          };
+        }
+      } else {
         const docBuffer = Buffer.from(await docFile.arrayBuffer());
+        const devDocDir = path.join("public", "uploads", "docs");
+        await fs.mkdir(devDocDir, { recursive: true });
         const docName = `${Date.now()}_${docFile.name}`;
-        const docDest = path.join("public", "uploads", "docs", docName);
+        const docDest = path.join(devDocDir, docName);
         await fs.writeFile(docDest, docBuffer);
         document_path = `/uploads/docs/${docName}`;
       }
-    } catch (err) {
-      console.error("File upload failed:", err);
-      return new Response(
-        JSON.stringify({ error: "File upload failed. Please try again." }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
     }
-
     const updated = {
       full_name: formData.get("full_name"),
       email: formData.get("email"),
@@ -153,6 +168,7 @@ export default function EmployeePage() {
   const [editing, setEditing] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(employee.photo_path || null);
   const [docName, setDocName] = useState(employee.document_path || null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -175,12 +191,24 @@ export default function EmployeePage() {
   useEffect(() => {
     if (editing && navigation.state === "idle" && !actionData?.errors) {
       setEditing(false);
+      setIsUpdating(false);
+    }
+    if (navigation.state === "submitting") {
+      setIsUpdating(true);
     }
   }, [navigation.state, actionData?.errors]);
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      {isUpdating && <LoadingSpinner />}
+
       <div className="flex gap-4 justify-center mb-10">
+        <a
+          href="/"
+          className="border border-black text-black font-semibold px-3 py-1 rounded hover:bg-black hover:text-white transition"
+        >
+          Home
+        </a>
         <a
           href="/employees"
           className="border border-blue-700 text-blue-700 font-semibold px-3 py-1 rounded hover:bg-blue-700 hover:text-white transition"
@@ -472,7 +500,8 @@ export default function EmployeePage() {
             <div className="flex gap-4 mt-6 justify-center">
               <button
                 type="submit"
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 cursor-pointer "
+                disabled={isUpdating}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 min-w-[140px] justify-center cursor-pointer"
               >
                 Save Changes
               </button>

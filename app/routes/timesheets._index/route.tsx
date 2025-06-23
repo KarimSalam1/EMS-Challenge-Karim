@@ -132,6 +132,12 @@ export default function TimesheetsPage() {
       <header className="flex items-center justify-between mb-12">
         <div className="flex gap-4">
           <a
+            href="/"
+            className="border border-black text-black font-semibold px-3 py-1 rounded hover:bg-black hover:text-white transition"
+          >
+            Home
+          </a>
+          <a
             href="/timesheets/new"
             className="border border-green-700 text-green-700 font-semibold px-3 py-1 rounded hover:bg-green-700 hover:text-white transition cursor-pointer"
           >
@@ -196,35 +202,34 @@ export default function TimesheetsPage() {
               <p className="text-center text-gray-500">No timesheets found.</p>
             ) : (
               paginatedTimesheets.map((timesheet) => (
-                <div
-                  key={timesheet.id}
-                  className="employee-card justify-between"
-                >
-                  <h2 className="text-lg font-semibold text-gray-800 mb-3">
-                    Timesheet #{timesheet.id}
-                  </h2>
-                  <ul className="text-gray-700 space-y-1">
-                    <li>
-                      <span className="font-bold">Employee: </span>
-                      {timesheet.full_name} (ID: {timesheet.employee_id})
-                    </li>
-                    <li>
-                      <span className="font-bold">Start Time: </span>
-                      {timesheet.start_time}
-                    </li>
-                    <li>
-                      <span className="font-bold">End Time: </span>
-                      {timesheet.end_time}
-                    </li>
-                    <li>
-                      <span className="font-bold">Summary: </span>
-                      {timesheet.summary || "No summary provided"}
-                    </li>
-                  </ul>
-                  <div className="flex flex-col items-start gap-2 sm:items-end">
+                <div key={timesheet.id} className="employee-card">
+                  <div className="w-full flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                        Timesheet #{timesheet.id}
+                      </h2>
+                      <ul className="text-gray-700 space-y-1">
+                        <li>
+                          <span className="font-bold">Employee: </span>
+                          {timesheet.full_name} (ID: {timesheet.employee_id})
+                        </li>
+                        <li>
+                          <span className="font-bold">Start Time: </span>
+                          {timesheet.start_time}
+                        </li>
+                        <li>
+                          <span className="font-bold">End Time: </span>
+                          {timesheet.end_time}
+                        </li>
+                        <li>
+                          <span className="font-bold">Summary: </span>
+                          {timesheet.summary || "No summary provided"}
+                        </li>
+                      </ul>
+                    </div>
                     <a
                       href={`/timesheets/${timesheet.id}`}
-                      className="border border-blue-700 text-blue-700 font-semibold px-3 py-1 rounded hover:bg-blue-700 hover:text-white transition"
+                      className="border border-blue-700 text-blue-700 font-semibold px-3 py-1 rounded hover:bg-blue-700 hover:text-white transition mt-15"
                     >
                       View Timesheet
                     </a>

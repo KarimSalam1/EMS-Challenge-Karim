@@ -70,6 +70,12 @@ export default function EmployeesPage() {
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-4 mb-10">
         <div className="flex gap-4">
           <a
+            href="/"
+            className="border border-black text-black font-semibold px-3 py-1 rounded hover:bg-black hover:text-white transition"
+          >
+            Home
+          </a>
+          <a
             href="/employees/new"
             className="border border-green-700 text-green-700 font-semibold px-3 py-1 rounded hover:bg-green-700 hover:text-white transition"
           >

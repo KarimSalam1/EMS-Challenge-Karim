@@ -2,11 +2,14 @@ import {
   Form,
   redirect,
   useActionData,
+  useNavigation,
   type ActionFunction,
 } from "react-router";
 import { getDB } from "~/db/getDB";
 import fs from "fs/promises";
 import path from "path";
+import { uploadToImgur, uploadToCatbox } from "~/utils/hybridUpload";
+import { LoadingSpinner } from "~/utils/loading";
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
@@ -31,24 +34,51 @@ export const action: ActionFunction = async ({ request }) => {
 
   const photoFile = formData.get("photo_file") as File;
   const docFile = formData.get("doc_file") as File;
-
   let photo_path = null;
   let document_path = null;
 
   if (photoFile && photoFile.name) {
-    const photoBuffer = Buffer.from(await photoFile.arrayBuffer());
-    const photoName = `${Date.now()}_${photoFile.name}`;
-    const photoDest = path.join("public", "uploads", "photos", photoName);
-    await fs.writeFile(photoDest, photoBuffer);
-    photo_path = `/uploads/photos/${photoName}`;
+    if (process.env.NODE_ENV === "production") {
+      try {
+        photo_path = await uploadToImgur(photoFile);
+      } catch (err) {
+        console.error("Photo upload error:", err);
+        return {
+          errors: {
+            photo_file: "Failed to upload photo to UploadThing.",
+          },
+        };
+      }
+    } else {
+      const photoBuffer = Buffer.from(await photoFile.arrayBuffer());
+      const devPhotoDir = path.join("public", "uploads", "photos");
+      await fs.mkdir(devPhotoDir, { recursive: true });
+      const photoName = `${Date.now()}_${photoFile.name}`;
+      const photoDest = path.join(devPhotoDir, photoName);
+      await fs.writeFile(photoDest, photoBuffer);
+      photo_path = `/uploads/photos/${photoName}`;
+    }
   }
 
   if (docFile && docFile.name) {
-    const docBuffer = Buffer.from(await docFile.arrayBuffer());
-    const docName = `${Date.now()}_${docFile.name}`;
-    const docDest = path.join("public", "uploads", "docs", docName);
-    await fs.writeFile(docDest, docBuffer);
-    document_path = `/uploads/docs/${docName}`;
+    if (docFile && docFile.name) {
+      if (process.env.NODE_ENV === "production") {
+        try {
+          document_path = await uploadToCatbox(docFile);
+        } catch (error) {
+          console.error("Document upload error:", error);
+          return { errors: { doc_file: "Failed to upload document." } };
+        }
+      }
+    } else {
+      const docBuffer = Buffer.from(await docFile.arrayBuffer());
+      const devDocDir = path.join("public", "uploads", "docs");
+      await fs.mkdir(devDocDir, { recursive: true });
+      const docName = `${Date.now()}_${docFile.name}`;
+      const docDest = path.join(devDocDir, docName);
+      await fs.writeFile(docDest, docBuffer);
+      document_path = `/uploads/docs/${docName}`;
+    }
   }
 
   const employeeData = {
@@ -124,19 +154,32 @@ export default function NewEmployeePage() {
   const actionData = useActionData() as {
     errors?: { date_of_birth?: string; date_range?: string };
   };
+  const navigation = useNavigation();
+
+  const isSubmitting = navigation.state === "submitting";
+
+  console.log("Running in", process.env.NODE_ENV, "mode");
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      {isSubmitting && <LoadingSpinner />}
+
       <div className="flex gap-4 justify-center mb-10">
         <a
+          href="/"
+          className="border border-black text-black font-semibold px-3 py-1 rounded hover:bg-black hover:text-white transition"
+        >
+          Home
+        </a>
+        <a
           href="/employees"
-          className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+          className="border border-blue-700 text-blue-700 font-semibold px-3 py-1 rounded hover:bg-blue-700 hover:text-white transition"
         >
           Employees
         </a>
         <a
           href="/timesheets"
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          className="border border-gray-700 text-gray-700 font-semibold px-3 py-1 rounded hover:bg-gray-700 hover:text-white transition"
         >
           Timesheets
         </a>
@@ -152,7 +195,8 @@ export default function NewEmployeePage() {
           <input
             name="full_name"
             required
-            className="w-full border rounded px-3 py-2"
+            disabled={isSubmitting}
+            className="w-full border rounded px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
 
@@ -162,7 +206,8 @@ export default function NewEmployeePage() {
             type="email"
             name="email"
             required
-            className="w-full border rounded px-3 py-2"
+            disabled={isSubmitting}
+            className="w-full border rounded px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
 
@@ -171,8 +216,9 @@ export default function NewEmployeePage() {
           <input
             type="tel"
             name="phone"
-            className="w-full border rounded px-3 py-2"
             required
+            disabled={isSubmitting}
+            className="w-full border rounded px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
 
@@ -182,7 +228,8 @@ export default function NewEmployeePage() {
             type="date"
             name="date_of_birth"
             required
-            className={`w-full border rounded px-3 py-2 ${
+            disabled={isSubmitting}
+            className={`w-full border rounded px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed ${
               actionData?.errors?.date_of_birth ? "border-red-500" : ""
             }`}
           />
@@ -192,8 +239,9 @@ export default function NewEmployeePage() {
           <label className="block font-medium mb-1">Job Title</label>
           <input
             name="job_title"
-            className="w-full border rounded px-3 py-2"
             required
+            disabled={isSubmitting}
+            className="w-full border rounded px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
 
@@ -201,8 +249,9 @@ export default function NewEmployeePage() {
           <label className="block font-medium mb-1">Department</label>
           <input
             name="department"
-            className="w-full border rounded px-3 py-2"
             required
+            disabled={isSubmitting}
+            className="w-full border rounded px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
 
@@ -212,8 +261,9 @@ export default function NewEmployeePage() {
             type="number"
             name="salary"
             min="0"
-            className="w-full border rounded px-3 py-2"
             required
+            disabled={isSubmitting}
+            className="w-full border rounded px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
 
@@ -223,7 +273,8 @@ export default function NewEmployeePage() {
             type="date"
             name="start_date"
             required
-            className={`w-full border rounded px-3 py-2 ${
+            disabled={isSubmitting}
+            className={`w-full border rounded px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed ${
               actionData?.errors?.date_range ? "border-red-500" : ""
             }`}
           />
@@ -234,7 +285,8 @@ export default function NewEmployeePage() {
           <input
             type="date"
             name="end_date"
-            className={`w-full border rounded px-3 py-2 ${
+            disabled={isSubmitting}
+            className={`w-full border rounded px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed ${
               actionData?.errors?.date_range ? "border-red-500" : ""
             }`}
           />
@@ -249,7 +301,9 @@ export default function NewEmployeePage() {
           <label className="block font-medium mb-1">Photo (optional)</label>
           <label
             htmlFor="photo_file"
-            className="inline-block cursor-pointer bg-blue-100 text-blue-700 border border-blue-300 px-4 py-2 rounded hover:bg-blue-200 transition"
+            className={`inline-block cursor-pointer bg-blue-100 text-blue-700 border border-blue-300 px-4 py-2 rounded hover:bg-blue-200 transition ${
+              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             Upload Photo
           </label>
@@ -258,6 +312,7 @@ export default function NewEmployeePage() {
             type="file"
             name="photo_file"
             accept="image/*"
+            disabled={isSubmitting}
             className="hidden"
           />
         </div>
@@ -266,7 +321,9 @@ export default function NewEmployeePage() {
           <label className="block font-medium mb-1">Document (optional)</label>
           <label
             htmlFor="doc_file"
-            className="inline-block cursor-pointer bg-green-100 text-green-700 border border-green-300 px-4 py-2 rounded hover:bg-green-200 transition"
+            className={`inline-block cursor-pointer bg-green-100 text-green-700 border border-green-300 px-4 py-2 rounded hover:bg-green-200 transition ${
+              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             Upload Document
           </label>
@@ -275,9 +332,11 @@ export default function NewEmployeePage() {
             type="file"
             name="doc_file"
             accept=".pdf,.doc,.docx"
+            disabled={isSubmitting}
             className="hidden"
           />
         </div>
+
         {actionData?.errors?.date_of_birth && (
           <p className="text-red-600 text-sm font-medium bg-red-50 border border-red-200 rounded px-3 py-2">
             {actionData.errors.date_of_birth}
@@ -287,7 +346,8 @@ export default function NewEmployeePage() {
         <div className="flex justify-center">
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
+            disabled={isSubmitting}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 min-w-[140px] justify-center cursor-pointer"
           >
             Create Employee
           </button>
