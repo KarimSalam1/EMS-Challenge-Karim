@@ -19,6 +19,7 @@ export const action: ActionFunction = async ({ request }) => {
   const employee_id = formData.get("employee_id");
   const start_time_raw = formData.get("start_time") as string;
   const end_time_raw = formData.get("end_time") as string;
+  const summary = formData.get("summary");
 
   if (start_time_raw && end_time_raw) {
     const startDate = new Date(start_time_raw);
@@ -41,8 +42,8 @@ export const action: ActionFunction = async ({ request }) => {
   const end_time = formatDateTime(end_time_raw);
 
   await db.run(
-    "INSERT INTO timesheets (employee_id, start_time, end_time) VALUES (?, ?, ?)",
-    [employee_id, start_time, end_time]
+    "INSERT INTO timesheets (employee_id, start_time, end_time, summary) VALUES (?, ?, ?, ?)",
+    [employee_id, start_time, end_time, summary]
   );
 
   return redirect("/timesheets");
@@ -77,6 +78,7 @@ export default function NewTimesheetPage() {
     setValidationError("");
     return true;
   };
+
   const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStartTime = e.target.value;
     setStartTime(newStartTime);
@@ -174,6 +176,19 @@ export default function NewTimesheetPage() {
                 ? "border-red-500"
                 : ""
             }`}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="summary" className="block font-medium mb-1">
+            Summary
+          </label>
+          <textarea
+            name="summary"
+            id="summary"
+            placeholder="Describe the work done during this timesheet period..."
+            rows={4}
+            className="w-full border rounded px-3 py-2 resize-vertical"
           />
         </div>
 

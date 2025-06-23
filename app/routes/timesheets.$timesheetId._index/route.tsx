@@ -42,6 +42,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
   if (intent === "update") {
     const employee_id = formData.get("employee_id");
+    const summary = formData.get("summary");
     const start_time_raw = formData.get("start_time") as string;
     const end_time_raw = formData.get("end_time") as string;
 
@@ -59,8 +60,8 @@ export const action: ActionFunction = async ({ request, params }) => {
     const start_time = start_time_raw?.replace("T", " ") + ":00";
     const end_time = end_time_raw?.replace("T", " ") + ":00";
     await db.run(
-      "UPDATE timesheets SET employee_id = ?, start_time = ?, end_time = ? WHERE id = ?",
-      [employee_id, start_time, end_time, id]
+      "UPDATE timesheets SET employee_id = ?, start_time = ?, end_time = ?, summary = ? WHERE id = ?",
+      [employee_id, start_time, end_time, summary, id]
     );
 
     return redirect(`/timesheets/${id}`);
@@ -118,6 +119,10 @@ export default function TimesheetPage() {
             </p>
             <p>
               <strong>End Time:</strong> {timesheet.end_time}
+            </p>
+            <p>
+              <strong>Summary:</strong>{" "}
+              {timesheet.summary || "No summary provided"}
             </p>
 
             <div className=" flex flex-row gap-2  mt-6">
@@ -195,6 +200,16 @@ export default function TimesheetPage() {
                 actionData?.errors?.time_validation ? "border-red-500" : ""
               }`}
             />
+
+            <label className="block font-medium">Summary</label>
+            <textarea
+              name="summary"
+              defaultValue={timesheet.summary || ""}
+              placeholder="Describe the work done during this timesheet period..."
+              rows={4}
+              className="w-full border px-3 py-2 rounded resize-vertical"
+            />
+
             {actionData?.errors?.time_validation && (
               <div className="text-red-600 text-sm font-medium bg-red-50 border border-red-200 rounded px-3 py-2">
                 {actionData.errors.time_validation}

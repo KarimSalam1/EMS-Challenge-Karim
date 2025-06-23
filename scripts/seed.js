@@ -100,31 +100,37 @@ const timesheets = [
     employee_id: 1,
     start_time: "2025-06-23 08:00:00",
     end_time: "2025-06-23 17:00:00",
+    summary: "Worked on user authentication system and fixed login bugs",
   },
   {
     employee_id: 2,
     start_time: "2025-06-23 17:00:00",
     end_time: "2025-06-23 22:00:00",
+    summary: "Product roadmap planning and stakeholder meetings",
   },
   {
     employee_id: 3,
     start_time: "2025-06-24 08:00:00",
     end_time: "2025-06-24 17:00:00",
+    summary: "UI/UX design for new dashboard components",
   },
   {
     employee_id: 4,
     start_time: "2025-06-24 17:00:00",
     end_time: "2025-06-24 22:00:00",
+    summary: "Code review and database optimization tasks",
   },
   {
     employee_id: 5,
     start_time: "2025-06-25 08:00:00",
     end_time: "2025-06-25 17:00:00",
+    summary: "Market research and competitive analysis",
   },
   {
     employee_id: 6,
-    start_time: "2025-06-24 17:00:00",
-    end_time: "2025-06-24 22:00:00",
+    start_time: "2025-06-25 17:00:00",
+    end_time: "2025-06-25 22:00:00",
+    summary: "Team management and sprint planning activities",
   },
 ];
 

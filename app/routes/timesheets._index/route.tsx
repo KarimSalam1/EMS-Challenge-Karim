@@ -41,6 +41,7 @@ export const action: ActionFunction = async ({ request }) => {
 
   if (intent === "edit") {
     const employee_id = formData.get("employee_id");
+    const summary = formData.get("summary");
 
     const start_time =
       (formData.get("start_time") as string)?.replace("T", " ") + ":00";
@@ -48,8 +49,8 @@ export const action: ActionFunction = async ({ request }) => {
       (formData.get("end_time") as string)?.replace("T", " ") + ":00";
 
     await db.run(
-      "UPDATE timesheets SET employee_id = ?, start_time = ?, end_time = ? WHERE id = ?",
-      [employee_id, start_time, end_time, id]
+      "UPDATE timesheets SET employee_id = ?, start_time = ?, end_time = ?, summary = ? WHERE id = ?",
+      [employee_id, start_time, end_time, summary, id]
     );
 
     return redirect("/timesheets");
@@ -98,7 +99,7 @@ export default function TimesheetsPage() {
 
   const filteredEvents = filteredTimesheets.map((timesheet) => ({
     id: timesheet.id.toString(),
-    title: `${timesheet.full_name} Timesheet Id: ${timesheet.id}`,
+    title: `${timesheet.full_name} - ${timesheet.summary || "No summary"}`,
     start: formatTime(timesheet.start_time),
     end: formatTime(timesheet.end_time),
   }));
@@ -214,6 +215,10 @@ export default function TimesheetsPage() {
                     <li>
                       <span className="font-bold">End Time: </span>
                       {timesheet.end_time}
+                    </li>
+                    <li>
+                      <span className="font-bold">Summary: </span>
+                      {timesheet.summary || "No summary provided"}
                     </li>
                   </ul>
                   <div className="flex flex-col items-start gap-2 sm:items-end">

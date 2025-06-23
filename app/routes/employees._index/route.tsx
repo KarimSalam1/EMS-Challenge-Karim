@@ -15,6 +15,8 @@ export default function EmployeesPage() {
   const [departmentFilter, setDepartmentFilter] = useState("");
   const [salaryFilter, setSalaryFilter] = useState(10000);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState("full_name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const itemsPerPage = 5;
 
@@ -33,12 +35,28 @@ export default function EmployeesPage() {
     return nameMatch && departmentMatch && salaryMatch;
   });
 
+  const sortedEmployees = [...filteredEmployees].sort((a, b) => {
+    const fieldA = a[sortField];
+    const fieldB = b[sortField];
+
+    if (fieldA == null) return 1;
+    if (fieldB == null) return -1;
+
+    if (typeof fieldA === "number" && typeof fieldB === "number") {
+      return sortOrder === "asc" ? fieldA - fieldB : fieldB - fieldA;
+    }
+
+    return sortOrder === "asc"
+      ? String(fieldA).localeCompare(String(fieldB))
+      : String(fieldB).localeCompare(String(fieldA));
+  });
+
   const totalPages = Math.max(
     1,
     Math.ceil(filteredEmployees.length / itemsPerPage)
   );
 
-  const paginatedEmployees = filteredEmployees.slice(
+  const paginatedEmployees = sortedEmployees.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -109,6 +127,40 @@ export default function EmployeesPage() {
           <span className="text-sm text-gray-700">
             ${salaryFilter.toLocaleString()}
           </span>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
+        <div className="flex items-center gap-2">
+          <label htmlFor="sortField" className="text-sm text-gray-700">
+            Sort By:
+          </label>
+          <select
+            id="sortField"
+            value={sortField}
+            onChange={(e) => setSortField(e.target.value)}
+            className="px-3 py-1 border border-gray-300 rounded"
+          >
+            <option value="full_name">Name</option>
+            <option value="department">Department</option>
+            <option value="job_title">Job Title</option>
+            <option value="salary">Salary</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <label htmlFor="sortOrder" className="text-sm text-gray-700">
+            Order:
+          </label>
+          <select
+            id="sortOrder"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
+            className="px-3 py-1 border border-gray-300 rounded"
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
         </div>
       </div>
 
