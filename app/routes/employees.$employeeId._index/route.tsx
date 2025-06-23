@@ -210,10 +210,8 @@ export default function EmployeePage() {
           <div className="flex flex-col items-center gap-6 border border-gray-300 rounded-lg p-6 shadow-sm max-w-4xl mx-auto">
             <div className="w-[90px] h-[90px]">
               <img
-                src={
-                  employee.photo_path || "/public/uploads/photos/default.png"
-                }
-                alt={`${employee.full_name} profile`}
+                src={employee.photo_path || "https://i.imgur.com/gSb4Uy4.png"}
+                alt={employee.full_name}
                 className="w-full h-full rounded-full object-cover border-2 border-green-500"
               />
             </div>
@@ -314,7 +312,7 @@ export default function EmployeePage() {
             <input type="hidden" name="intent" value="update" />
             <div className="flex flex-col items-center mb-8">
               <img
-                src={photoPreview || "/public/uploads/photos/default.png"}
+                src={photoPreview || "https://i.imgur.com/gSb4Uy4.png"}
                 alt="Profile Preview"
                 className="w-32 h-32 rounded-full object-cover border-2 border-green-500 mb-2"
               />

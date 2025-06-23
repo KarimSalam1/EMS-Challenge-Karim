@@ -121,9 +121,7 @@ export default function EmployeesPage() {
           {paginatedEmployees.map((employee) => (
             <div key={employee.id} className="employee-card">
               <img
-                src={
-                  employee.photo_path || "/public/uploads/photos/default.png"
-                }
+                src={employee.photo_path || "https://i.imgur.com/gSb4Uy4.png"}
                 alt={employee.full_name}
                 className="w-16 h-16 rounded-full object-cover border-2 border-emerald-500"
               />
