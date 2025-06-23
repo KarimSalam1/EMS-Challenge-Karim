@@ -1,59 +1,129 @@
-import sqlite3 from 'sqlite3';
-import fs from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
-import { fileURLToPath } from 'url';
+import sqlite3 from "sqlite3";
+import fs from "fs";
+import path from "path";
+import yaml from "js-yaml";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbConfigPath = path.join(__dirname, '../database.yaml');
-const dbConfig = yaml.load(fs.readFileSync(dbConfigPath, 'utf8'));
+const dbConfigPath = path.join(__dirname, "../database.yaml");
+const dbConfig = yaml.load(fs.readFileSync(dbConfigPath, "utf8"));
 
-const {
-  'sqlite_path': sqlitePath,
-} = dbConfig;
+const { sqlite_path: sqlitePath } = dbConfig;
 
 const db = new sqlite3.Database(sqlitePath);
 
 const employees = [
   {
-    full_name: 'John Doe'
+    full_name: "John Doe",
+    email: "john.doe@example.com",
+    phone: "1234567890",
+    date_of_birth: "1990-01-01",
+    job_title: "Software Engineer",
+    department: "Engineering",
+    salary: 6000,
+    start_date: "2020-01-01",
+    end_date: null,
+    photo_path: "/uploads/photos/john.jpg",
+    document_path: "/uploads/docs/john_cv.pdf",
   },
   {
-    full_name: 'Jane Smith'
+    full_name: "Jane Smith",
+    email: "jane.smith@example.com",
+    phone: "9876543210",
+    date_of_birth: "1992-03-15",
+    job_title: "Product Manager",
+    department: "Product",
+    salary: 7500,
+    start_date: "2019-06-10",
+    end_date: null,
+    photo_path: "/uploads/photos/jane.jpg",
+    document_path: "/uploads/docs/jane_cv.pdf",
   },
   {
-    full_name: 'Alice Johnson'
+    full_name: "Alice Johnson",
+    email: "alice.johnson@example.com",
+    phone: "1234567890",
+    date_of_birth: "1988-11-25",
+    job_title: "Designer",
+    department: "Design",
+    salary: 5000,
+    start_date: "2021-04-20",
+    end_date: null,
+    photo_path: "/uploads/photos/alice.jpg",
+    document_path: "/uploads/docs/alice_cv.pdf",
+  },
+  {
+    full_name: "Brayden Watkins",
+    email: "brayden.watkins@example.com",
+    phone: "1234567890",
+    date_of_birth: "1988-11-25",
+    job_title: "Software Engineer",
+    department: "Engineering",
+    salary: 7000,
+    start_date: "2021-06-20",
+    end_date: null,
+    photo_path: "/uploads/photos/brayden.jpg",
+    document_path: "/uploads/docs/brayden_cv.pdf",
+  },
+  {
+    full_name: "Leta Nelson",
+    email: "leta.nelson@example.com",
+    phone: "1234567890",
+    date_of_birth: "1998-11-25",
+    job_title: "Product Manager",
+    department: "Product",
+    salary: 4000,
+    start_date: "2021-05-20",
+    end_date: null,
+    photo_path: "/uploads/photos/leta.jpg",
+    document_path: "/uploads/docs/leta_cv.pdf",
+  },
+  {
+    full_name: "Scott George",
+    email: "scott.george@example.com",
+    phone: "1234567890",
+    date_of_birth: "1988-12-25",
+    job_title: "Product Manager",
+    department: "Product",
+    salary: 8000,
+    start_date: "2021-05-20",
+    end_date: null,
+    photo_path: "/uploads/photos/scott.jpg",
+    document_path: "/uploads/docs/scott_cv.pdf",
   },
 ];
 
 const timesheets = [
   {
     employee_id: 1,
-    start_time: '2025-02-10 08:00:00',
-    end_time: '2025-02-10 17:00:00',
+    start_time: "2025-02-10 08:00:00",
+    end_time: "2025-02-10 17:00:00",
   },
   {
     employee_id: 2,
-    start_time: '2025-02-11 12:00:00',
-    end_time: '2025-02-11 17:00:00',
+    start_time: "2025-02-11 12:00:00",
+    end_time: "2025-02-11 17:00:00",
   },
   {
     employee_id: 3,
-    start_time: '2025-02-12 07:00:00',
-    end_time: '2025-02-12 16:00:00',
+    start_time: "2025-02-12 07:00:00",
+    end_time: "2025-02-12 16:00:00",
   },
 ];
 
-
 const insertData = (table, data) => {
-  const columns = Object.keys(data[0]).join(', ');
-  const placeholders = Object.keys(data[0]).map(() => '?').join(', ');
+  const columns = Object.keys(data[0]).join(", ");
+  const placeholders = Object.keys(data[0])
+    .map(() => "?")
+    .join(", ");
 
-  const insertStmt = db.prepare(`INSERT INTO ${table} (${columns}) VALUES (${placeholders})`);
+  const insertStmt = db.prepare(
+    `INSERT INTO ${table} (${columns}) VALUES (${placeholders})`
+  );
 
-  data.forEach(row => {
+  data.forEach((row) => {
     insertStmt.run(Object.values(row));
   });
 
@@ -61,15 +131,14 @@ const insertData = (table, data) => {
 };
 
 db.serialize(() => {
-  insertData('employees', employees);
-  insertData('timesheets', timesheets);
+  insertData("employees", employees);
+  insertData("timesheets", timesheets);
 });
 
-db.close(err => {
+db.close((err) => {
   if (err) {
     console.error(err.message);
   } else {
-    console.log('Database seeded successfully.');
+    console.log("Database seeded successfully.");
   }
 });
-
