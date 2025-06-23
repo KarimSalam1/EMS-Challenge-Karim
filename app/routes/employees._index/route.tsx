@@ -66,7 +66,7 @@ export default function EmployeesPage() {
   }, [searchTerm, departmentFilter, salaryFilter]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-4 mb-10">
         <div className="flex gap-4">
           <a
@@ -136,7 +136,7 @@ export default function EmployeesPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
+      <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
         <div className="flex items-center gap-2">
           <label htmlFor="sortField" className="text-sm text-gray-700">
             Sort By:
